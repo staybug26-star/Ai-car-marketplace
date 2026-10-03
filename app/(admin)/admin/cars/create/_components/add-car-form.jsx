@@ -55,7 +55,16 @@ const carFormSchema = z.object({
     const year = parseInt(val);
     return !isNaN(year) && year >= 1900 && year <= new Date().getFullYear() + 1;
   }, "Valid year required"),
-  price: z.string().min(1, "Price is required"),
+  price: z
+    .string()
+    .min(1, "Price is required")
+    .refine(
+      (value) => {
+        const price = Number(value.replace(/[$,\s]/g, ""));
+        return Number.isFinite(price) && price > 0;
+      },
+      "Enter a valid price"
+    ),
   mileage: z.string().min(1, "Mileage is required"),
   color: z.string().min(1, "Color is required"),
   fuelType: z.string().min(1, "Fuel type is required"),
@@ -144,8 +153,8 @@ export const AddCarForm = () => {
       setValue("color", carDetails.color);
       setValue("bodyType", carDetails.bodyType);
       setValue("fuelType", carDetails.fuelType);
-      setValue("price", carDetails.price);
-      setValue("mileage", carDetails.mileage);
+      setValue("price", String(carDetails.price ?? "").replace(/[$,\s]/g, ""));
+      setValue("mileage", String(carDetails.mileage ?? "").replace(/[,\s]/g, ""));
       setValue("transmission", carDetails.transmission);
       setValue("description", carDetails.description);
 
@@ -277,7 +286,7 @@ export const AddCarForm = () => {
     const carData = {
       ...data,
       year: parseInt(data.year),
-      price: parseFloat(data.price),
+      price: Number(data.price.replace(/[$,\s]/g, "")),
       mileage: parseInt(data.mileage),
       seats: data.seats ? parseInt(data.seats) : null,
     };

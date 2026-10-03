@@ -129,6 +129,11 @@ export async function processCarImageWithAI(file) {
 // Add a car to the database with images
 export async function addCar({ carData, images }) {
   try {
+    const price = Number(carData?.price);
+    if (!Number.isFinite(price) || price <= 0) {
+      throw new Error("A valid price is required");
+    }
+
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
@@ -199,7 +204,7 @@ export async function addCar({ carData, images }) {
         make: carData.make,
         model: carData.model,
         year: carData.year,
-        price: carData.price,
+        price,
         mileage: carData.mileage,
         color: carData.color,
         fuelType: carData.fuelType,
