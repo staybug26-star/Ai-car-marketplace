@@ -47,6 +47,9 @@ const bodyTypes = [
 ];
 const carStatuses = ["AVAILABLE", "UNAVAILABLE", "SOLD"];
 
+const normalizeNumericValue = (value) =>
+  String(value ?? "").replace(/[^\d.-]/g, "");
+
 // Define form schema with Zod
 const carFormSchema = z.object({
   make: z.string().min(1, "Make is required"),
@@ -60,12 +63,21 @@ const carFormSchema = z.object({
     .min(1, "Price is required")
     .refine(
       (value) => {
-        const price = Number(value.replace(/[$,\s]/g, ""));
+        const price = Number(normalizeNumericValue(value));
         return Number.isFinite(price) && price > 0;
       },
       "Enter a valid price"
     ),
-  mileage: z.string().min(1, "Mileage is required"),
+  mileage: z
+    .string()
+    .min(1, "Mileage is required")
+    .refine(
+      (value) => {
+        const mileage = Number(normalizeNumericValue(value));
+        return Number.isInteger(mileage) && mileage >= 0;
+      },
+      "Enter a valid mileage"
+    ),
   color: z.string().min(1, "Color is required"),
   fuelType: z.string().min(1, "Fuel type is required"),
   transmission: z.string().min(1, "Transmission is required"),
@@ -153,8 +165,8 @@ export const AddCarForm = () => {
       setValue("color", carDetails.color);
       setValue("bodyType", carDetails.bodyType);
       setValue("fuelType", carDetails.fuelType);
-      setValue("price", String(carDetails.price ?? "").replace(/[$,\s]/g, ""));
-      setValue("mileage", String(carDetails.mileage ?? "").replace(/[,\s]/g, ""));
+      setValue("price", normalizeNumericValue(carDetails.price));
+      setValue("mileage", normalizeNumericValue(carDetails.mileage));
       setValue("transmission", carDetails.transmission);
       setValue("description", carDetails.description);
 
@@ -286,8 +298,8 @@ export const AddCarForm = () => {
     const carData = {
       ...data,
       year: parseInt(data.year),
-      price: Number(data.price.replace(/[$,\s]/g, "")),
-      mileage: parseInt(data.mileage),
+      price: Number(normalizeNumericValue(data.price)),
+      mileage: Number(normalizeNumericValue(data.mileage)),
       seats: data.seats ? parseInt(data.seats) : null,
     };
 

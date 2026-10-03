@@ -134,6 +134,11 @@ export async function addCar({ carData, images }) {
       throw new Error("A valid price is required");
     }
 
+    const mileage = Number(carData?.mileage);
+    if (!Number.isInteger(mileage) || mileage < 0) {
+      throw new Error("A valid mileage is required");
+    }
+
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
@@ -205,7 +210,7 @@ export async function addCar({ carData, images }) {
         model: carData.model,
         year: carData.year,
         price,
-        mileage: carData.mileage,
+        mileage,
         color: carData.color,
         fuelType: carData.fuelType,
         transmission: carData.transmission,
